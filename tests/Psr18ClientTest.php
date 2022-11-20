@@ -11,7 +11,7 @@ use Drewlabs\Psr7\Uri;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Client\ClientInterface;
 
-if (PHP_VERSION >= 70000) {
+if (PHP_VERSION_ID >= 70000) {
     class Psr18ClientTest extends TestCase
     {
         /** @var MockWebServer */
