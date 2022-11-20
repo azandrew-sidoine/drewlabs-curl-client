@@ -1,0 +1,34 @@
+{
+    "name": "drewlabs/curl-client",
+    "description": "Provides a PHP class around PHP curl object and Psr18 client based on the curl library",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Drewlabs\\Curl\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "azandrew-sidoine",
+            "email": "asmyns.platonnas29@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "php": ">=7.0",
+        "ext-curl": "*",
+        "drewlabs/psr7-stream": "^1.2"
+    },
+    "require-dev": {
+        "donatj/mock-webserver": "^2.5",
+        "phpunit/phpunit": ">=6.0",
+        "psr/http-client": "^1.0",
+        "drewlabs/psr7": "^0.1.1"
+    },
+    "suggest": {
+        "psr/http-client": "Expected to use Psr18Client curl client",
+        "drewlabs/psr7": "Psr7 implementation require for Psr18Client curl client usage"
+    }
+}
