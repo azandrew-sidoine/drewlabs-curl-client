@@ -8,6 +8,10 @@
             "Drewlabs\\Curl\\": "src/"
         }
     },
+    "keywords": [
+        "curl",
+        "http"
+    ],
     "authors": [
         {
             "name": "azandrew-sidoine",
