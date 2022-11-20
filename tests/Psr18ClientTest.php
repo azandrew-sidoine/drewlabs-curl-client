@@ -29,6 +29,8 @@ class Psr18ClientTest extends TestCase
         // Any other response may be specified as default as well.
         self::$server->setDefaultResponse(new NotFoundResponse);
         self::$server->start();
+
+        return;
     }
 
     public function test_psr18_client_create_new_instance()
@@ -198,5 +200,7 @@ class Psr18ClientTest extends TestCase
     {
         // stopping the web server during tear down allows us to reuse the port for later tests
         self::$server->stop();
+
+        return;
     }
 }
