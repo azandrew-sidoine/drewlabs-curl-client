@@ -76,7 +76,7 @@ if (PHP_VERSION_ID >= 70000) {
                         'reference' => 'TR-98249LBN8724',
                         'status' => 0,
                         'processors' => [],
-                        'created_at' => date('Y-m-d\TH:i:sP'),
+                        'created_at' => date('Y-m-d H:i:s'),
                     ])),
                     1000
                 )
@@ -99,7 +99,7 @@ if (PHP_VERSION_ID >= 70000) {
                 'reference' => 'TR-98249LBN8724',
                 'status' => 0,
                 'processors' => [],
-                'created_at' => date('Y-m-d\TH:i:sP'),
+                'created_at' => date('Y-m-d H:i:s'),
             ];
             $this->assertEquals($expects, json_decode($response->getBody()->__toString(), true));
         }
