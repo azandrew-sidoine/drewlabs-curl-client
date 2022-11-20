@@ -13,7 +13,7 @@ class CookiesBag
     /**
      * @var string[]
      */
-    private const RFC2616 = [
+    const RFC2616 = [
         // RFC 2616: "any CHAR except CTLs or separators".
         // CHAR           = <any US-ASCII character (octets 0 - 127)>
         // CTL            = <any US-ASCII control character
@@ -34,7 +34,7 @@ class CookiesBag
     /**
      * @var string[]
      */
-    private const RFC6265 = [
+    const RFC6265 = [
         // RFC 6265: "US-ASCII characters excluding CTLs, whitespace DQUOTE, comma, semicolon, and backslash".
         // %x21
         '!',

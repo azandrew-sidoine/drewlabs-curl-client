@@ -91,7 +91,7 @@ class RequestOptions
                 }
                 // Tries to generate a camelcase method name from property name and prefix it with set
                 if (method_exists($instance, $method = 'set' . str_replace(' ', '', ucwords(str_replace('_', ' ', $name))))) {
-                    \Closure::fromCallable([$instance, $method])->call($instance, $value);
+                    call_user_func([$instance, $method], $value);
                     continue;
                 }
                 if (property_exists($instance, $name)) {
