@@ -73,7 +73,7 @@ class Psr18ClientTest extends TestCase
                     'reference' => 'TR-98249LBN8724',
                     'status' => 0,
                     'processors' => [],
-                    'created_at' => date(\DateTimeImmutable::RFC3339),
+                    'created_at' => date('Y-m-d\TH:i:sP'),
                 ])),
                 1000
             )
@@ -96,7 +96,7 @@ class Psr18ClientTest extends TestCase
             'reference' => 'TR-98249LBN8724',
             'status' => 0,
             'processors' => [],
-            'created_at' => date(\DateTimeImmutable::RFC3339),
+            'created_at' => date('Y-m-d\TH:i:sP'),
         ];
         $this->assertEquals($expects, json_decode($response->getBody()->__toString(), true));
     }
