@@ -43,7 +43,7 @@ class PostRequestResponse implements InitializingResponseInterface
 
     public function getBody(RequestInfo $request)
     {
-        return empty($this->body) ? json_encode($post = $request->getPost()) : $this->body;
+        return empty($this->body) ? json_encode($request->getPost()) : $this->body;
     }
 
     public function getHeaders(RequestInfo $request)

@@ -2,7 +2,7 @@
 
 namespace Drewlabs\Curl;
 
-use Drewlabs\TxnClient\Converters\JSONEncoder;
+use Drewlabs\Curl\Converters\JSONEncoder;
 use RuntimeException;
 
 class PostDataBuilder
@@ -18,7 +18,7 @@ class PostDataBuilder
      * 
      * @var \Closure
      */
-    private $encoder = false;
+    private $encoder;
 
     /**
      * Creates a builder instance
@@ -38,11 +38,11 @@ class PostDataBuilder
      */
     public function asJSON()
     {
-        $this->asJson = function (PostData $data) {
+        $this->encoder = function (PostData $data) {
             if (!$data->isJSONSerializable()) {
                 throw new RuntimeException('Post data is not JSON serializable');
             }
-            return JSONEncoder::new()->encode($data->getContent());
+            return (new JSONEncoder)->encode($data->getContent());
         };
         return $this;
     }

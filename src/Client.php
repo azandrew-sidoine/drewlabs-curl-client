@@ -117,8 +117,54 @@ class Client
      * 
      * @return void 
      */
-    public function send($data = [])
+
+    /**
+     * Execute or send the curl request
+     * 
+     * @param string|array|null $method 
+     * @param string|array|null $path 
+     * @param array<string,string|string[]> $options
+     * 
+     * @return void 
+     * @throws RuntimeException 
+     */
+    public function send($method = 'GET', $path = null, array $options = [])
     {
+        //#region - Make eht send() method polymophic by supporting diffent types for first and last parameters
+        if ((func_num_args() === 1) && is_array($method)) {
+            $options = $method;
+            $method = null;
+            $path = null;
+        } else if (func_num_args() === 2 && is_array($path)) {
+            $method = $method;
+            $options = $path;
+            $path = null;
+        }
+        //#region - Make eht send() method polymophic by supporting diffent types for first and last parameters
+        // Construct the request url by reading the $options as well
+        $path = $path ?? $options['url'] ?? '';
+        if ((null === $this->base_url) && empty($path)) {
+            throw new RuntimeException('Client::send() require a request url, none provided. Either call $client->setRequestUri() before calling $client->send(...) or call $client->send($params, $methodOrNull, $request_url)');
+        }
+        // Set the request URL
+        $urlIsAbsolute = !empty($path) && ($compoents = \parse_url($path)) ?
+            isset($compoents['host']) && isset($compoents['scheme']) : false;
+        if ($urlIsAbsolute) {
+            $this->setOption(\CURLOPT_URL,  str_replace("&amp;", "&", urldecode(urlencode(trim($path)))));
+        } else if (!$urlIsAbsolute && null === $this->base_url) {
+            throw new InvalidArgumentException('Client base URL is require if $path parameter is not an absolute url.');
+        } else {
+            // We compose the url with the 
+            $url = rtrim($this->base_url, '/') . (empty($path) ? '' : ('/' . ltrim($path)));
+            $this->setOption(\CURLOPT_URL,  str_replace("&amp;", "&", urldecode(urlencode(trim($url)))));
+        }
+
+        // Add the method to the request options
+        if (null !== $method) {
+            // By default we use the 'GET' method when no request method is provided
+            $this->options['method'] = $method;
+        }
+
         if (!empty($progressListerners = ($this->listeners['progress'] ?? []))) {
             $this->setOption(CURLOPT_NOPROGRESS, false);
             $this->setOption(CURLOPT_PROGRESSFUNCTION, function (...$args) use ($progressListerners) {
@@ -129,9 +175,21 @@ class Client
                 }
             });
         }
-        if (!empty($data)) {
-            $this->setOption(CURLOPT_POSTFIELDS, $this->buildPostData($data));
+
+        // Set the request options if any provided
+        if (!empty($options)) {
+            // We make sure curl options are not overwritten by the request options passed to the send
+            // method
+            $this->options = array_merge(
+                ($this->options ?? []),
+                ($options ?? []),
+                ['curl' => $this->options['curl'] ?? []]
+            );
         }
+
+        // Then we set the request options
+        $this->setRequestOptions($this->options);
+
         // Executes the curl request
         $rawResponse = curl_exec($this->curl);
         // Get the curl session error number, error messages, and response code
@@ -154,7 +212,7 @@ class Client
      */
     public function setRequestMethod($method = 'GET')
     {
-        $this->setOption(CURLOPT_CUSTOMREQUEST, $method);
+        $this->method = $method;
         return $this;
     }
 
@@ -166,6 +224,8 @@ class Client
      */
     public function setRequestUri($url)
     {
+        $url = (string)$url;
+        $this->assertRequesUrl($url);
         $this->setOption(CURLOPT_URL, (string)$url);
         return $this;
     }
@@ -505,23 +565,23 @@ class Client
         $this->initializeListeners();
         $this->options = $options ?? [];
         //
-        if (isset($this->options)) {
-            foreach ($this->options as $key => $value) {
+        if (isset($this->options['curl']) && is_array($curlOptions = $this->options['curl'])) {
+            foreach ($curlOptions as $key => $value) {
                 $this->setOption($key, $value);
             }
+            if (!array_key_exists(CURLOPT_USERAGENT, $curlOptions)) {
+                $this->useDefaultUserAgent();
+            }
+            if (!array_key_exists(CURLINFO_HEADER_OUT, $curlOptions)) {
+                $this->setOption(CURLINFO_HEADER_OUT, true);
+            }
         }
-        // By default we want to manually handle return result of the curl request
-        $this->setOption(CURLOPT_RETURNTRANSFER, true);
         // Set the function to handle the returned headers event
         $this->setOption(CURLOPT_HEADERFUNCTION, $this->curlHeaderCallback);
-        if (!array_key_exists(CURLOPT_USERAGENT, $this->options)) {
-            $this->useDefaultUserAgent();
-        }
-        if (!array_key_exists(CURLINFO_HEADER_OUT, $this->options)) {
-            $this->setOption(CURLINFO_HEADER_OUT, true);
-        }
+        // By default request result are exec result is returned to the client in a raw string
+        $this->setOption(\CURLOPT_RETURNTRANSFER, true);
         if ($base_url !== null) {
-            $this->setOption(CURLOPT_URL, $base_url);
+            $this->base_url = $base_url;
         }
     }
 
@@ -536,20 +596,20 @@ class Client
     }
 
     /**
-     * Build the request post data
+     * Provides the developper to build the request body based on user provided type
      * 
      * @param mixed $data 
      * @param string $contentType 
      * @return string|false|array 
      * @throws RuntimeException 
      */
-    private function buildPostData($data, string $contentType = 'application/json')
+    public function buildPostData($data, string $contentType = 'application/json')
     {
         $postData = new PostData($data);
         $builder = new PostDataBuilder($postData);
         if (
             (isset($contentType)) &&
-            preg_match(self::JSON_PATTERN, $contentType) &&
+            (false !== preg_match(self::JSON_PATTERN, $contentType)) &&
             $postData->isJSONSerializable()
         ) {
             $builder = $builder->asJSON();
@@ -570,6 +630,96 @@ class Client
         $curl_version = curl_version();
         $agent .= ' curl/' . $curl_version['version'];
         return $agent;
+    }
+
+    private function assertRequesUrl($url)
+    {
+        $result = @parse_url($url);
+        if (false === $result || (null === $result)) {
+            throw new InvalidArgumentException('Request url does not match PHP url standard');
+        }
+    }
+
+    /**
+     * Set the request options
+     * 
+     * @param array $options 
+     * @return void 
+     * @throws RuntimeException 
+     */
+    private function setRequestOptions(array $options)
+    {
+        $this->setOption(CURLOPT_CUSTOMREQUEST, $options['method'] ?? 'GET');
+
+        // Set the request headers if any
+        $headers = $options['headers'] ?? [];
+        if (!empty($headers)) {
+            $this->setRequestHeaders($headers);
+        }
+
+        // Set the request cookies if any
+        if (!empty($cookies = ($options['cookies'] ?? []))) {
+            $this->setRequestCookies($cookies);
+        }
+
+        // Set the request body if any. The request body is parsed based on the parameters provided in the request
+        //  Content-Type header
+        if (!empty($body = ($options['body'] ?? []))) {
+            $contentType = !empty($headers) ? $this->getHeader($headers, 'Content-Type') : 'application/x-www-form-urlencoded';
+            $contentType = is_array($contentType) ? implode(',', $contentType) : $contentType ?? 'application/x-www-form-urlencoded';
+            $postFields  = $this->buildPostData($body, $contentType);
+            $this->setOption(CURLOPT_POSTFIELDS, $postFields);
+        }
+    }
+
+    /**
+     * 
+     * @param array $cookies 
+     * @return void 
+     */
+    private function setRequestCookies(array $cookies)
+    {
+        if (count($cookies)) {
+            $this->setOption(CURLOPT_COOKIE, implode('; ', array_map(function ($key, $value) {
+                return $key . '=' . $value;
+            }, array_keys($cookies), array_values($cookies))));
+        }
+    }
+
+    /**
+     * Set the curl session headers
+     * 
+     * @param array $requestHeaders 
+     * @return void 
+     */
+    private function setRequestHeaders(array $requestHeaders)
+    {
+        $headers = [];
+        foreach ($requestHeaders as $key => $value) {
+            $headers[] = $key . ': ' . (is_array($value) ? implode(', ', $value) : ($value ?? ''));
+        }
+        $this->setOption(CURLOPT_HTTPHEADER, $headers);
+    }
+
+    /**
+     * Get request header caseless
+     * 
+     * @param array $headers 
+     * @param string $name 
+     * @return array<string>|null 
+     */
+    private function getHeader(array $headers, string $name)
+    {
+        if (empty($headers)) {
+            return null;
+        }
+        $normalized = strtolower($name);
+        foreach ($headers as $key => $header) {
+            if (strtolower($key) === $normalized) {
+                return is_array($header) ? $header : [$header];
+            }
+        }
+        return null;
     }
 
     public function __destruct()

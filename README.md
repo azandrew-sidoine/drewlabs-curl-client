@@ -30,6 +30,22 @@ use Drewlabs\Curl\Client;
 
 // Creates an instance of the cURL client
 $client = new Client('http://127.0.0.1:8000');
+
+/ Passing request options to the cURL client
+$client = new Client([
+    'base_url' => 'http://127.0.0.1:5000',
+    'headers' => [
+        'Content-Type' => 'application/json',
+    ],
+    'cookies' => [
+        'clientid' => '...',
+        'clientsecret' => '...'
+    ]
+]);
+
+
+// Create request client with a base URL
+$client = new Client('http://127.0.0.1:5000');
 ```
 
 #### Curl Options
@@ -51,7 +67,6 @@ $client->setOption(\CURLOPT_WRITE, function($curl, $write) {
 In order to pass cURL options as array, we use the `setOptions()` array method:
 
 ```php
-
 use Drewlabs\Curl\Client;
 
 // Creates an instance of the cURL client
@@ -76,22 +91,27 @@ use Drewlabs\Curl\Client;
 // Creates an instance of the cURL client
 $client = new Client(/* Parameters */);
 
-// ... Comnfigure cURL options
+// ... Use pre-configure cURL options
 $client->send();
 
-// To pass data to the request when sending POST, PUT, etc... method
+// Passing request options
 $client->send([
-    'title' => 'Hello World'
+    'headers' => [
+        'Content-Type' => 'application/json'
+    ],
+    'body' => [
+        'title' => 'Hello World'
+    ]
 ]);
 
 // To specify the request url when sending the request
-$client->send([], 'http://127.0.0.1:3000/api/posts');
+$client->send('GET', 'http://127.0.0.1:3000/api/posts');
 
 // or simply a path
-$client->send([], null, '/api/posts');
+$client->send(null, '/api/posts');
 
 // To override or provide the request method
-$client->send([], 'POST', '/api/posts');
+$client->send('POST', '/api/posts');
 ```
 
 - Helper methods

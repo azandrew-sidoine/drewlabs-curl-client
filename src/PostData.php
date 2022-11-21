@@ -2,7 +2,6 @@
 
 namespace Drewlabs\Curl;
 
-use Drewlabs\TxnClient\HasContructorFactory;
 use JsonSerializable;
 
 /**
@@ -13,7 +12,6 @@ use JsonSerializable;
  */
 class PostData
 {
-    use HasContructorFactory;
 
     /**
      * 
