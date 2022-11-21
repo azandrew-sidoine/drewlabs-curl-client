@@ -114,6 +114,26 @@ $client->send(null, '/api/posts');
 $client->send('POST', '/api/posts');
 ```
 
+Sometimes you may have constructed the curl request and wish to simply execute the curl request. To do so the client mimic the curl `exec()` method by providing `Client::exec()` method for sending request to server.
+
+```php
+use Drewlabs\Curl\Client;
+
+// Creates an instance of the cURL client
+$client = new Client(/* Parameters */);
+
+$client->setRequestMethod('POST');
+$client->setRequestUri('http://127.0.0.1:5000/api/posts');
+$this->setOption(CURLOPT_HTTPHEADER, [
+    'Content-Type: application/json',
+    'Accept: */*'
+])
+$client->setOption(\CURLOPT_POSTFIELDS, json_encode([/* JSON fields*/]));
+
+// Execute the Curl request
+$client->exec();
+```
+
 - Helper methods
 
 The client comes with some helper method for basic curl HTTP options like, `CURLOPT_URL`, `\CURLOPT_SSL_VERIFYPEER`, `\CURLOPT_HTTP_VERSION` etc... Below is a brief API definition for most common use cases:

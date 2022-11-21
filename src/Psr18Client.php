@@ -127,7 +127,8 @@ class Psr18Client implements ClientInterface
         $request = $this->overrideRequest($request, $this->options);
         $options = $this->buildCurlRequestOptions($request);
         $this->client->setOptions($options);
-        $this->client->send();
+        // Call the curl execute to send the actual request
+        $this->client->exec();
         if (($errorno = $this->client->getError()) !== 0) {
             // Throw Error if client return error code different from 0
             [$exceptionMessage, $errorCode] = [$this->client->getErrorMessage(), CurlError::toHTTPStatusCode($errorno)];

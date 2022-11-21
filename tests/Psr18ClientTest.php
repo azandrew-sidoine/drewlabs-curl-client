@@ -68,16 +68,17 @@ if (version_compare(PHP_VERSION, '7.1.0') >= 0) {
 
         public function test_psr18_client_get_request()
         {
+            $expects = [
+                'id' => 2,
+                'reference' => 'TR-98249LBN8724',
+                'status' => 0,
+                'processors' => [],
+                'created_at' => date('Y-m-d H:i:s'),
+            ];
             $url = self::$server->setResponseOfPath(
                 '/api/transactions',
                 new DelayedResponse(
-                    new Response(json_encode([
-                        'id' => 2,
-                        'reference' => 'TR-98249LBN8724',
-                        'status' => 0,
-                        'processors' => [],
-                        'created_at' => date('Y-m-d H:i:s'),
-                    ])),
+                    new Response(json_encode($expects)),
                     1000
                 )
             );
@@ -94,13 +95,6 @@ if (version_compare(PHP_VERSION, '7.1.0') >= 0) {
                 ]
             ]);
             $response = $client->sendRequest(new Request('GET', ''));
-            $expects = [
-                'id' => 2,
-                'reference' => 'TR-98249LBN8724',
-                'status' => 0,
-                'processors' => [],
-                'created_at' => date('Y-m-d H:i:s'),
-            ];
             $this->assertEquals($expects, json_decode($response->getBody()->__toString(), true));
         }
 

@@ -35,8 +35,8 @@ if (version_compare(PHP_VERSION, '7.1.0') >= 0) {
         public function test_send_http_get_request()
         {
             $url = self::$server->setResponseOfPath('/test/post', new Response(json_encode([])));
-            $client = new Client($url, [
-                // 'base_url' => '',
+            $client = new Client([
+                'url' => str_replace('/test/post', '', $url),
                 'headers' => [
                     'Content-Type' => 'application/json',
                     'Accept' => '*/*'
@@ -44,7 +44,9 @@ if (version_compare(PHP_VERSION, '7.1.0') >= 0) {
             ]);
 
             // Send the actual request to the server
-            $client->send('GET');
+            $client->send('GET', [
+                'url' => '/test/post'
+            ]);
 
             $response = $client->getResponse();
             $this->assertEquals(200, $client->getStatusCode());
