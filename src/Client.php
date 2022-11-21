@@ -91,6 +91,12 @@ class Client
     private $rawResponseHeaders;
 
     /**
+     * 
+     * @var string
+     */
+    private $base_url;
+
+    /**
      * Creates an instance of PHP cURL controller
      * 
      * @param string|null $base_url 
@@ -250,16 +256,26 @@ class Client
     }
     /**
      * 
-     * @param mixed $version 
-     * @return void 
+     * @param string $version 
+     * 
      * @throws InvalidArgumentException 
      */
-    public function setProtocolVersion($version)
+    public function setProtocolVersion($version = '1.0')
     {
         if (!is_numeric($version)) {
             throw new InvalidArgumentException('HTTP protocol versin must be a valid protocol version');
         }
-        $this->protocolVersion = $version;
+        switch ((string)$version) {
+            case '1.1':
+                $this->protocolVersion = \CURL_HTTP_VERSION_1_1;
+                break;
+            case '2.0':
+                $this->protocolVersion = \CURL_HTTP_VERSION_2_0;
+                break;
+            default:
+                $this->protocolVersion = \CURL_HTTP_VERSION_1_0;
+                break;
+        }
         $this->setOption(CURLOPT_HTTP_VERSION, $this->protocolVersion);
     }
 
@@ -518,7 +534,7 @@ class Client
     {
         $this->listeners = ['progress' => []];
     }
-    
+
     /**
      * Build the request post data
      * 
