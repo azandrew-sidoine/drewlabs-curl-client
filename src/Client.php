@@ -2,6 +2,7 @@
 
 namespace Drewlabs\Curl;
 
+use CurlHandle;
 use RuntimeException;
 use ErrorException;
 use InvalidArgumentException;
@@ -19,7 +20,7 @@ class Client
      * 
      * @var string
      */
-    private $version = '0.1.0';
+    const VERSION = '0.1.0';
 
     /**
      * 
@@ -49,13 +50,13 @@ class Client
      * 
      * @var string
      */
-    private $curlErrorMessage = '';
+    private $curlErrorMessage;
 
     /**
      * 
      * @var int
      */
-    private $curlError = '';
+    private $curlError;
 
     /**
      * 
@@ -68,7 +69,7 @@ class Client
      * 
      * @var array
      */
-    private $listeners;
+    private $listeners = [];
 
     /**
      * Request options property
@@ -133,10 +134,10 @@ class Client
      */
     public function send($method = null, $path = null, array $options = [])
     {
-        if (func_num_args() > 0 ) {
-            $this->prepareSendRequest(...array_filter([$method, $path, $options]));
+        if (func_num_args() > 0) {
+            $options = $this->prepareRequestOptions(...array_filter([$method, $path, $options]));
             // Then we set the request options
-            $this->setRequestOptions($this->options);
+            $this->setRequestOptions($options);
         }
         // Executes the curl request
         $this->exec();
@@ -171,6 +172,16 @@ class Client
         $this->statusCode  = $this->getInfo(CURLINFO_RESPONSE_CODE);
         $this->rawResponseHeaders = $this->curlHeaderCallback->getHeaders();
         $this->response = $rawResponse;
+    }
+
+    /**
+     * Returns the instance id
+     * 
+     * @return string 
+     */
+    public function id()
+    {
+        return $this->id;
     }
 
     /**
@@ -226,13 +237,10 @@ class Client
     /**
      * Returns the Request response object
      * 
-     * @return string 
+     * @return string|null
      */
     public function getResponse()
     {
-        if (null === $this->response) {
-            throw new RuntimeException('cURL response is not available. Make sure you invoke the execute method before calling getResponse() method');
-        }
         return $this->response;
     }
 
@@ -257,7 +265,7 @@ class Client
     /**
      * Returns the curl error if any
      * 
-     * @return int 
+     * @return int|null
      */
     public function getError()
     {
@@ -267,7 +275,7 @@ class Client
     /**
      * Returns the response status code
      * 
-     * @return int 
+     * @return int|null
      */
     public function getStatusCode()
     {
@@ -277,7 +285,7 @@ class Client
     /**
      * Returns the raw response headers
      * 
-     * @return string 
+     * @return string|null 
      */
     public function getResponseHeaders()
     {
@@ -456,11 +464,26 @@ class Client
         $this->curlHeaderCallback = null;
         $this->curlError = null;
         $this->curlErrorMessage = null;
+        $this->rawResponseHeaders = null;
+        $this->statusCode = null;
+        $this->response = null;
+        $this->protocolVersion = '1.1';
         $this->initializeListeners();
         $this->setOption(\CURLOPT_HEADERFUNCTION, null);
         $this->setOption(\CURLOPT_READFUNCTION, null);
         $this->setOption(\CURLOPT_WRITEFUNCTION, null);
         $this->setOption(\CURLOPT_PROGRESSFUNCTION, null);
+        $this->reset();
+    }
+
+
+    /**
+     * Result the client for the current session 
+     * 
+     * @return void 
+     */
+    public function reset()
+    {
         \curl_reset($this->curl);
     }
 
@@ -472,9 +495,7 @@ class Client
     public function close()
     {
         // We close the curl connection when we dispose the current instance
-        if ($this->curl) {
-            \curl_close($this->curl);
-        }
+        \curl_close($this->curl);
     }
 
     /**
@@ -522,17 +543,12 @@ class Client
      */
     private function initialize($base_url = null, array $options = [])
     {
-        if (!extension_loaded('curl')) {
-            throw new \ErrorException('cURL library is not loaded, but is required by the library');
-        }
-        $this->id = uniqid('', true);
-        if (false === $curl = curl_init()) {
-            throw new RuntimeException('Failed to initialize a new curl session, Please ensure that you have curl extension installed and functionning properly');
-        }
-        $this->curl = $curl;
+        $this->id = $this->id ?? uniqid('', true);
+        $this->curl = $this->curl ?? $this->createCurlInstance();
         $this->curlHeaderCallback = new CurlHeadersCallback;
         $this->initializeListeners();
-        $this->options = $options ?? [];
+        // Initialization function is invoke to initialize the 
+        $this->options = $options ?? $this->options ?? [];
         //
         if (isset($this->options['curl']) && is_array($curlOptions = $this->options['curl'])) {
             foreach ($curlOptions as $key => $value) {
@@ -549,7 +565,25 @@ class Client
         $this->setOption(CURLOPT_HEADERFUNCTION, $this->curlHeaderCallback);
         // By default request result are exec result is returned to the client in a raw string
         $this->setOption(\CURLOPT_RETURNTRANSFER, true);
-        $this->base_url = $base_url !== null ? $base_url : $this->options['url'] ?? null;
+        $this->base_url = $base_url !== null ? $base_url : $this->options['base_url'] ?? null;
+    }
+
+    /**
+     * Creates a new curl handle
+     * 
+     * @return CurlHandle|false 
+     * @throws ErrorException 
+     * @throws RuntimeException 
+     */
+    private function createCurlInstance()
+    {
+        if (!extension_loaded('curl')) {
+            throw new \ErrorException('cURL library is not loaded, but is required by the library');
+        }
+        if (false === ($curl = curl_init())) {
+            throw new RuntimeException('Failed to initialize a new curl session, Please ensure that you have curl extension installed and functionning properly');
+        }
+        return $curl;
     }
 
     /**
@@ -559,6 +593,15 @@ class Client
      */
     private function initializeListeners()
     {
+        foreach (($this->listeners ?? []) as $listeners) {
+            $listeners = is_array($listeners) ? $listeners : [];
+            foreach ($listeners as $listener) {
+                if (null === $listener) {
+                    continue;
+                }
+                unset($listener);
+            }
+        }
         $this->listeners = ['progress' => []];
     }
 
@@ -593,7 +636,7 @@ class Client
      */
     private function useDefaultUserAgent()
     {
-        $agent = 'TxnClient/' . $this->version;
+        $agent = 'drewlabs/' . self::VERSION;
         $curl_version = curl_version();
         $agent .= ' curl/' . $curl_version['version'];
         return $agent;
@@ -689,7 +732,17 @@ class Client
         return null;
     }
 
-    private function prepareSendRequest($method, $path = null, array $options = [])
+    /**
+     * Prepare the request options to use when executing request
+     * 
+     * @param mixed $method     Request verb
+     * @param mixed $path       Request path
+     * @param array $options    List of options to override default options if exists or appended to the default options if not exists
+     * @return array 
+     * @throws RuntimeException 
+     * @throws InvalidArgumentException 
+     */
+    public function prepareRequestOptions($method, $path = null, array $options = [])
     {
         //#region - Make eht send() method polymophic by supporting diffent types for first and last parameters
         if ((func_num_args() === 1) && is_array($method)) {
@@ -705,7 +758,7 @@ class Client
         if (!empty($options)) {
             // We make sure curl options are not overwritten by the request options passed to the send
             // method
-            $this->options = array_merge(
+            $options = array_merge(
                 ($this->options ?? []),
                 ($options ?? []),
                 ['curl' => $this->options['curl'] ?? []]
@@ -733,13 +786,15 @@ class Client
         // Add the method to the request options
         if (null !== $method) {
             // By default we use the 'GET' method when no request method is provided
-            $this->options['method'] = $method;
+            $options['method'] = $method;
         }
+        return $options;
     }
 
     public function __destruct()
     {
         $this->release();
+        $this->initializeListeners();
         $this->close();
     }
 }
