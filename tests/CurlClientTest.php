@@ -36,7 +36,7 @@ if (version_compare(PHP_VERSION, '7.1.0') >= 0) {
         {
             $url = self::$server->setResponseOfPath('/test/post', new Response(json_encode([])));
             $client = new Client([
-                'url' => str_replace('/test/post', '', $url),
+                'base_url' => str_replace('/test/post', '', $url),
                 'headers' => [
                     'Content-Type' => 'application/json',
                     'Accept' => '*/*'
@@ -51,6 +51,34 @@ if (version_compare(PHP_VERSION, '7.1.0') >= 0) {
             $response = $client->getResponse();
             $this->assertEquals(200, $client->getStatusCode());
             $this->assertTrue(is_string($response));
+        }
+
+
+        public function test_client_release_reset_client_configurations_to_default()
+        {
+            $url = self::$server->setResponseOfPath('/test/post', new Response(json_encode([])));
+            $client = new Client([
+                'base_url' => str_replace('/test/post', '', $url),
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    'Accept' => '*/*'
+                ]
+            ]);
+
+            $client->send([
+                'url' => '/test/post'
+            ]);
+            $this->assertEquals(200, $client->getStatusCode());
+            $this->assertTrue(is_string($client->getResponse()));
+            $this->assertTrue(is_string($client->getResponseHeaders()));
+
+            $client->release();
+
+            $this->assertTrue(null === $client->getStatusCode());
+            $this->assertTrue(null === $client->getResponse());
+            $this->assertTrue(null === $client->getResponseHeaders());
+
+
         }
 
         public function test_curl_client_send_request_with_options()
