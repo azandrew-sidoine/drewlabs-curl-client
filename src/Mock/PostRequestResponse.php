@@ -27,7 +27,7 @@ class PostRequestResponse implements InitializingResponseInterface
         $this->status  = $status;
     }
 
-    public function initialize(RequestInfo $request)
+    public function initialize(RequestInfo $request): void
     {
     }
 
