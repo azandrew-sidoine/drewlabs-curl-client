@@ -31,7 +31,7 @@ class PostRequestResponse implements InitializingResponseInterface
     {
     }
 
-    public function getRef()
+    public function getRef(): string
     {
         $content = json_encode([
             $this->body,
@@ -41,17 +41,17 @@ class PostRequestResponse implements InitializingResponseInterface
         return md5('post-request.' . $content);
     }
 
-    public function getBody(RequestInfo $request)
+    public function getBody(RequestInfo $request): string
     {
         return empty($this->body) ? json_encode($request->getPost()) : $this->body;
     }
 
-    public function getHeaders(RequestInfo $request)
+    public function getHeaders(RequestInfo $request) : array
     {
 		return $this->headers ?? [];
     }
 
-    public function getStatus(RequestInfo $request)
+    public function getStatus(RequestInfo $request): int
     {
 		return $this->status ?? 200;
     }
