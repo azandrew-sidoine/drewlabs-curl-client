@@ -9,11 +9,6 @@ use InvalidArgumentException;
 
 class Client
 {
-    /**
-     * 
-     * @var string
-     */
-    const JSON_PATTERN = '/^(?:application|text)\/(?:[a-z]+(?:[\.-][0-9a-z]+){0,}[\+\.]|x-)?json(?:-[a-z]+)?/i';
 
     /**
      * Current package version
@@ -78,7 +73,6 @@ class Client
      */
     private $options = [];
 
-
     /**
      * 
      * @var int
@@ -115,12 +109,16 @@ class Client
     }
 
     /**
-     * Execute the current request
-     * 
-     * @param array|object|string $data 
+     * Executes instance initialization logic. It initializes required
+     * properties and configure listeners
      * 
      * @return void 
+     * @throws RuntimeException 
      */
+    public function init()
+    {
+        $this->initialize();
+    }
 
     /**
      * Execute or send the curl request
@@ -532,6 +530,15 @@ class Client
         curl_setopt_array($this->curl, $options);
     }
 
+    /**
+     * Returns the client options
+     * 
+     * @return array 
+     */
+    public function getOptions()
+    {
+        return $this->options;
+    }
 
     /**
      * Initialize the cURL client
@@ -548,7 +555,7 @@ class Client
         $this->curlHeaderCallback = new CurlHeadersCallback;
         $this->initializeListeners();
         // Initialization function is invoke to initialize the 
-        $this->options = $options ?? $this->options ?? [];
+        $this->options = empty($this->options) ? $options ?? [] : $this->options ?? [];
         //
         if (isset($this->options['curl']) && is_array($curlOptions = $this->options['curl'])) {
             foreach ($curlOptions as $key => $value) {
@@ -565,7 +572,7 @@ class Client
         $this->setOption(CURLOPT_HEADERFUNCTION, $this->curlHeaderCallback);
         // By default request result are exec result is returned to the client in a raw string
         $this->setOption(\CURLOPT_RETURNTRANSFER, true);
-        $this->base_url = $base_url !== null ? $base_url : $this->options['base_url'] ?? null;
+        $this->base_url = $this->base_url ?? ($base_url !== null ? $base_url : $this->options['base_url'] ?? null);
     }
 
     /**
@@ -619,7 +626,7 @@ class Client
         $builder = new PostDataBuilder($postData);
         if (
             (isset($contentType)) &&
-            (false !== preg_match(self::JSON_PATTERN, $contentType)) &&
+            RegExp::matchJson($contentType) &&
             $postData->isJSONSerializable()
         ) {
             $builder = $builder->asJSON();
@@ -775,7 +782,7 @@ class Client
             isset($compoents['host']) && isset($compoents['scheme']) : false;
         if ($urlIsAbsolute) {
             $this->setOption(\CURLOPT_URL,  str_replace("&amp;", "&", urldecode(urlencode(trim($path)))));
-        } else if (!$urlIsAbsolute && null === $this->base_url) {
+        } else if (!$urlIsAbsolute && (null === $this->base_url)) {
             throw new InvalidArgumentException('Client base URL is require if $path parameter is not an absolute url.');
         } else {
             // We compose the url with the 
