@@ -6,7 +6,7 @@ use JsonException;
 
 // Define the JSON_THROW_ON_ERROR global constant if not exists
 if (!defined('JSON_THROW_ON_ERROR')) {
-    defined('JSON_THROW_ON_ERROR', 4194304);
+    define('JSON_THROW_ON_ERROR', 4194304);
 }
 
 /**

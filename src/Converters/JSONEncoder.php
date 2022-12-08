@@ -4,7 +4,7 @@ namespace Drewlabs\Curl\Converters;
 
 // Define the JSON_PRETTY_PRINT global constant if not exists
 if (!defined('JSON_PRETTY_PRINT')) {
-    defined('JSON_PRETTY_PRINT', 128);
+    define('JSON_PRETTY_PRINT', 128);
 }
 
 /**
