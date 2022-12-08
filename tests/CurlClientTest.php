@@ -77,8 +77,13 @@ if (version_compare(PHP_VERSION, '7.1.0') >= 0) {
             $this->assertTrue(null === $client->getStatusCode());
             $this->assertTrue(null === $client->getResponse());
             $this->assertTrue(null === $client->getResponseHeaders());
-
-
+            $this->assertEquals([
+                'base_url' => str_replace('/test/post', '', $url),
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    'Accept' => '*/*'
+                ]
+            ], $client->getOptions());
         }
 
         public function test_curl_client_send_request_with_options()

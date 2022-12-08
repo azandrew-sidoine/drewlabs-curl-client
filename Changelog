@@ -1,0 +1,5 @@
+# Package changelogs
+
+## [0.1.5]
+
+- Added an init() method to curl client to initialize the client after release is called
