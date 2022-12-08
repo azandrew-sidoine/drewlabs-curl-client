@@ -40,7 +40,7 @@ class JSONDecoder
      * @param null|int $depth 
      * @param int $flags 
      */
-    public function __construct($associative = true, ?int $depth = 512, int $flags = 0)
+    public function __construct($associative = true, int $depth = 512, int $flags = 0)
     {
         $this->associative = $associative;
         $this->depth = $depth ?? 512;
