@@ -3,3 +3,8 @@
 ## [0.1.5]
 
 - Added an init() method to curl client to initialize the client after release is called
+
+## [0.2.0]
+
+- Bug fix release in send and prepareOptions
+- Breaking changes for prepareOptions parameter
