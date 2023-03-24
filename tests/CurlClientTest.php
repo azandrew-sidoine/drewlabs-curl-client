@@ -34,7 +34,7 @@ if (version_compare(PHP_VERSION, '7.1.0') >= 0) {
 
         public function test_send_http_get_request()
         {
-            $url = self::$server->setResponseOfPath('/test/post', new Response(json_encode([])));
+            $url = self::$server->setResponseOfPath('/test/post', new Response(json_encode([]), [], 200));
             $client = new Client([
                 'base_url' => str_replace('/test/post', '', $url),
                 'headers' => [

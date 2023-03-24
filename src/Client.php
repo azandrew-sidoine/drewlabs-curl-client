@@ -92,6 +92,12 @@ class Client
     private $base_url;
 
     /**
+     * 
+     * @var string
+     */
+    private $method;
+
+    /**
      * Creates an instance of PHP cURL controller
      * 
      * @param string|array|null $baseUrlOrOptions 
@@ -133,7 +139,9 @@ class Client
     public function send($method = null, $path = null, array $options = [])
     {
         if (func_num_args() > 0) {
-            $options = $this->prepareRequestOptions(...array_filter([$method, $path, $options]));
+            $options1 = is_array($method) ? $method : (is_string($method) ? ['method' => $method] : []);
+            $options2 = is_array($path) ? $path : (is_string($path) ? ['url' => $path] : []);
+            $options = $this->prepareRequestOptions(array_merge($options ?? [], $options1 ?? [], $options2 ?? []));
             // Then we set the request options
             $this->setRequestOptions($options);
         }
@@ -191,6 +199,19 @@ class Client
     public function setRequestMethod($method = 'GET')
     {
         $this->method = $method;
+        return $this;
+    }
+
+    /**
+     * Set the request base url property
+     * 
+     * @param string $url 
+     * 
+     * @return self 
+     */
+    public function setBaseUri(string $url)
+    {
+        $this->base_url = $url;
         return $this;
     }
 
@@ -452,28 +473,6 @@ class Client
         return $this;
     }
 
-    /**
-     * Relese and reset curl session
-     * 
-     * @return void 
-     */
-    public function release()
-    {
-        $this->curlHeaderCallback = null;
-        $this->curlError = null;
-        $this->curlErrorMessage = null;
-        $this->rawResponseHeaders = null;
-        $this->statusCode = null;
-        $this->response = null;
-        $this->protocolVersion = '1.1';
-        $this->initializeListeners();
-        $this->setOption(\CURLOPT_HEADERFUNCTION, null);
-        $this->setOption(\CURLOPT_READFUNCTION, null);
-        $this->setOption(\CURLOPT_WRITEFUNCTION, null);
-        $this->setOption(\CURLOPT_PROGRESSFUNCTION, null);
-        $this->reset();
-    }
-
 
     /**
      * Result the client for the current session 
@@ -538,6 +537,96 @@ class Client
     public function getOptions()
     {
         return $this->options;
+    }
+
+    /**
+     * Provides the developper to build the request body based on user provided type
+     * 
+     * @param mixed $data 
+     * @param string $contentType 
+     * @return string|false|array 
+     * @throws RuntimeException 
+     */
+    public function buildPostData($data, string $contentType = 'application/json')
+    {
+        $postData = new PostData($data);
+        $builder = new PostDataBuilder($postData);
+        if (
+            (isset($contentType)) &&
+            RegExp::matchJson($contentType) &&
+            $postData->isJSONSerializable()
+        ) {
+            $builder = $builder->asJSON();
+        } else if (!isset($contentType) || !preg_match('/^multipart\/form-data/', $contentType)) {
+            $builder = $builder->asURLEncoded();
+        }
+        return $builder->build();
+    }
+
+    /**
+     * Prepare the request options to use when executing request
+     * 
+     * @internal Do not call the current API as it internal implementation might change
+     * 
+     * @param array $options    List of options to override default options if exists or appended to the default options if not exists
+     * @return array 
+     * @throws RuntimeException 
+     * @throws InvalidArgumentException 
+     */
+    public function prepareRequestOptions(array $options = [])
+    {
+        if (!empty($options)) {
+            // We make sure curl options are not overwritten by the request options passed to the send
+            // method
+            $options = array_merge(($this->options ?? []), ($options ?? []), ['curl' => $this->options['curl'] ?? []]);
+        }
+        //#region - Make eht send() method polymophic by supporting diffent types for first and last parameters
+        // Construct the request url by reading the $options as well
+        if ((null === $this->base_url) && empty(isset($options['url']))) {
+            throw new RuntimeException('Client::send() require a request url, none provided. Either call $client->setRequestUri() before calling $client->send(...) or call $client->send($params, $methodOrNull, $request_url)');
+        }
+        $path = $options['url'] ?? '';
+        // Set the request URL
+        $absolute = !empty($path) && ($compoents = \parse_url($path)) ? isset($compoents['host']) && isset($compoents['scheme']) : false;
+
+        if (!$absolute && (null === $this->base_url)) {
+            throw new InvalidArgumentException('Client base URL is require if $path parameter is not an absolute url.');
+        }
+
+        $this->setRequestUri($absolute ? str_replace("&amp;", "&", urldecode(urlencode(trim($path)))) : str_replace("&amp;", "&", urldecode(urlencode(trim(rtrim($this->base_url, '/') . (empty($path) ? '' : ('/' . ltrim($path, '/'))))))));
+
+        // Returns the prepared options 
+        return $options;
+    }
+
+
+    /**
+     * Relese and reset curl session
+     * 
+     * @return void 
+     */
+    public function release()
+    {
+        $this->curlHeaderCallback = null;
+        $this->curlError = null;
+        $this->curlErrorMessage = null;
+        $this->rawResponseHeaders = null;
+        $this->statusCode = null;
+        $this->response = null;
+        $this->protocolVersion = '1.1';
+        $this->initializeListeners();
+        $this->setOption(\CURLOPT_HEADERFUNCTION, null);
+        $this->setOption(\CURLOPT_READFUNCTION, null);
+        $this->setOption(\CURLOPT_WRITEFUNCTION, null);
+        $this->setOption(\CURLOPT_PROGRESSFUNCTION, null);
+        $this->reset();
+    }
+
+    public function __destruct()
+    {
+        $this->release();
+        $this->initializeListeners();
+        $this->close();
     }
 
     /**
@@ -610,30 +699,6 @@ class Client
             }
         }
         $this->listeners = ['progress' => []];
-    }
-
-    /**
-     * Provides the developper to build the request body based on user provided type
-     * 
-     * @param mixed $data 
-     * @param string $contentType 
-     * @return string|false|array 
-     * @throws RuntimeException 
-     */
-    public function buildPostData($data, string $contentType = 'application/json')
-    {
-        $postData = new PostData($data);
-        $builder = new PostDataBuilder($postData);
-        if (
-            (isset($contentType)) &&
-            RegExp::matchJson($contentType) &&
-            $postData->isJSONSerializable()
-        ) {
-            $builder = $builder->asJSON();
-        } else if (!isset($contentType) || !preg_match('/^multipart\/form-data/', $contentType)) {
-            $builder = $builder->asURLEncoded();
-        }
-        return $builder->build();
     }
 
     /**
@@ -737,71 +802,5 @@ class Client
             }
         }
         return null;
-    }
-
-    /**
-     * Prepare the request options to use when executing request
-     * 
-     * @param mixed $method     Request verb
-     * @param mixed $path       Request path
-     * @param array $options    List of options to override default options if exists or appended to the default options if not exists
-     * @return array 
-     * @throws RuntimeException 
-     * @throws InvalidArgumentException 
-     */
-    public function prepareRequestOptions($method, $path = null, array $options = [])
-    {
-        //#region - Make eht send() method polymophic by supporting diffent types for first and last parameters
-        if ((func_num_args() === 1) && is_array($method)) {
-            $options = $method;
-            $method = null;
-            $path = null;
-        } else if (func_num_args() === 2 && is_array($path)) {
-            $method = $method;
-            $options = $path;
-            $path = null;
-        }
-        // Set the request options if any provided
-        if (!empty($options)) {
-            // We make sure curl options are not overwritten by the request options passed to the send
-            // method
-            $options = array_merge(
-                ($this->options ?? []),
-                ($options ?? []),
-                ['curl' => $this->options['curl'] ?? []]
-            );
-        }
-        //#region - Make eht send() method polymophic by supporting diffent types for first and last parameters
-        // Construct the request url by reading the $options as well
-        $path = $path ?? $options['url'] ?? '';
-        if ((null === $this->base_url) && empty($path)) {
-            throw new RuntimeException('Client::send() require a request url, none provided. Either call $client->setRequestUri() before calling $client->send(...) or call $client->send($params, $methodOrNull, $request_url)');
-        }
-        // Set the request URL
-        $urlIsAbsolute = !empty($path) && ($compoents = \parse_url($path)) ?
-            isset($compoents['host']) && isset($compoents['scheme']) : false;
-        if ($urlIsAbsolute) {
-            $this->setOption(\CURLOPT_URL,  str_replace("&amp;", "&", urldecode(urlencode(trim($path)))));
-        } else if (!$urlIsAbsolute && (null === $this->base_url)) {
-            throw new InvalidArgumentException('Client base URL is require if $path parameter is not an absolute url.');
-        } else {
-            // We compose the url with the 
-            $url = rtrim($this->base_url, '/') . (empty($path) ? '' : ('/' . ltrim($path, '/')));
-            $this->setOption(\CURLOPT_URL,  str_replace("&amp;", "&", urldecode(urlencode(trim($url)))));
-        }
-
-        // Add the method to the request options
-        if (null !== $method) {
-            // By default we use the 'GET' method when no request method is provided
-            $options['method'] = $method;
-        }
-        return $options;
-    }
-
-    public function __destruct()
-    {
-        $this->release();
-        $this->initializeListeners();
-        $this->close();
     }
 }
