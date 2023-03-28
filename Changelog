@@ -8,3 +8,8 @@
 
 - Bug fix release in send and prepareOptions
 - Breaking changes for prepareOptions parameter
+
+## [0.3.0 Minor breaking changes
+
+- Removed deprecated psr18 client implementation
+- To minize requirements of the library and reduce package dependencies size, we remove psr18 dependencies

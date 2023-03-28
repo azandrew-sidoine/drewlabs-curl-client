@@ -27,10 +27,5 @@
     "require-dev": {
         "donatj/mock-webserver": "^2.5",
         "phpunit/phpunit": ">=6.0"
-    },
-    "suggest": {
-        "psr/http-client": "Expected to use Psr18Client curl client",
-        "drewlabs/psr7": "Psr7 implementation require for Psr18Client curl client usage",
-        "drewlabs/psr7-stream": "Psr7 stream required for Psr18Client curl client usage"
     }
 }
