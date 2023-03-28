@@ -3,3 +3,4 @@ Notes.md
 /vendor/
 /vscode/
 index.php
+/.phpunit.cache/

@@ -5,6 +5,10 @@ namespace Drewlabs\Curl;
 use ReflectionClass;
 use Psr\Http\Message\StreamInterface;
 
+/**
+ * @deprecated v0.2.0 Implementation will be moved to drewlabs/psr18
+ * @package Drewlabs\Curl
+ */
 class ClientOptions
 {
     /**
@@ -74,6 +78,12 @@ class ClientOptions
     private $cookies = [];
 
     /**
+     * 
+     * @var int|null
+     */
+    private $timeout;
+
+    /**
      * Creates an instance of the clien options class
      * 
      * @param string $base_url
@@ -108,6 +118,9 @@ class ClientOptions
     public static function create(array $properties = [])
     {
         if (is_array($properties)) {
+            /**
+             * @var object
+             */
             $instance = (new ReflectionClass(__CLASS__))->newInstanceWithoutConstructor();
             foreach ($properties as $name => $value) {
                 if (null === $value) {

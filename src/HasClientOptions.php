@@ -12,6 +12,10 @@ use InvalidArgumentException;
 use Psr\Http\Message\RequestInterface;
 use RuntimeException;
 
+/**
+ * @deprecated v0.2.0 Implementation will be moved to drewlabs/psr18
+ * @package Drewlabs\Curl
+ */
 trait HasClientOptions
 {
     /**

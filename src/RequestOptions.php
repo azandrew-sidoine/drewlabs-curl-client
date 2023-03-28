@@ -5,6 +5,10 @@ namespace Drewlabs\Curl;
 use InvalidArgumentException;
 use ReflectionClass;
 
+/**
+ * @deprecated v0.2.0 Implementation will be moved to drewlabs/psr18
+ * @package Drewlabs\Curl
+ */
 class RequestOptions
 {
     /**

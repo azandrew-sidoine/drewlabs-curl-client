@@ -14,6 +14,8 @@ use ReflectionException;
 /**
  * @method static Psr18Client new(string $base_url, $options = [])
  * 
+ * @deprecated v0.2.0 Implementation will be moved to drewlabs/psr18
+ * 
  * @package Drewlabs\Curl
  */
 class Psr18Client implements ClientInterface

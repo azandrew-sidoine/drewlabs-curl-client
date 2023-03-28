@@ -2,6 +2,10 @@
 
 namespace Drewlabs\Curl;
 
+/**
+ * @deprecated v0.2.0 Implementation will be moved to drewlabs/psr18
+ * @package Drewlabs\Curl
+ */
 class CookiesBag
 {
     /**
