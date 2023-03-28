@@ -2,6 +2,12 @@
 
 namespace Drewlabs\Curl;
 
+/**
+ * Internal implementation of header callback register
+ * 
+ * @internal
+ * @package Drewlabs\Curl
+ */
 class CurlHeadersCallback
 {
     /**

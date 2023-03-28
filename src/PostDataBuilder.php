@@ -5,6 +5,12 @@ namespace Drewlabs\Curl;
 use Drewlabs\Curl\Converters\JSONEncoder;
 use RuntimeException;
 
+/**
+ * Post data builder class based on request content-type header
+ * 
+ * @internal
+ * @package Drewlabs\Curl
+ */
 class PostDataBuilder
 {
 
