@@ -8,33 +8,35 @@ use Drewlabs\Curl\Client;
 use Drewlabs\Curl\Mock\PostRequestResponse;
 use PHPUnit\Framework\TestCase;
 
-if (version_compare(PHP_VERSION, '7.1.0') >= 0) {
-    class CurlClientTest extends TestCase
+class CurlClientTest extends TestCase
+{
+
+
+    public function runPHPUnitTest(\Closure $callback)
     {
-        /** @var MockWebServer */
-        protected static $server;
+        $server = new MockWebServer;
+        // The default response is donatj\MockWebServer\Responses\DefaultResponse
+        // which returns an HTTP 200 and a descriptive JSON payload.
+        //
+        // Change the default response to donatj\MockWebServer\Responses\NotFoundResponse
+        // to get a standard 404.
+        //
+        // Any other response may be specified as default as well.
+        $server->setDefaultResponse(new NotFoundResponse);
+        $server->start();
 
-        #[\ReturnTypeWillChange]
-        public static function setUpBeforeClass(): void
-        {
-            self::$server = new MockWebServer;
-            // The default response is donatj\MockWebServer\Responses\DefaultResponse
-            // which returns an HTTP 200 and a descriptive JSON payload.
-            //
-            // Change the default response to donatj\MockWebServer\Responses\NotFoundResponse
-            // to get a standard 404.
-            //
-            // Any other response may be specified as default as well.
-            self::$server->setDefaultResponse(new NotFoundResponse);
-            self::$server->start();
+        // Executes phpunit test
+        $callback($server);
 
-            return;
-        }
+        $server->stop();
+        
+        return;
+    }
 
-
-        public function test_send_http_get_request()
-        {
-            $url = self::$server->setResponseOfPath('/test/post', new Response(json_encode([]), [], 200));
+    public function test_send_http_get_request()
+    {
+        $this->runPHPUnitTest(function ($server) {
+            $url = $server->setResponseOfPath('/test/post', new Response(json_encode([]), [], 200));
             $client = new Client([
                 'base_url' => str_replace('/test/post', '', $url),
                 'headers' => [
@@ -51,12 +53,14 @@ if (version_compare(PHP_VERSION, '7.1.0') >= 0) {
             $response = $client->getResponse();
             $this->assertEquals(200, $client->getStatusCode());
             $this->assertTrue(is_string($response));
-        }
+        });
+    }
 
 
-        public function test_client_release_reset_client_configurations_to_default()
-        {
-            $url = self::$server->setResponseOfPath('/test/post', new Response(json_encode([])));
+    public function test_client_release_reset_client_configurations_to_default()
+    {
+        $this->runPHPUnitTest(function ($server) {
+            $url = $server->setResponseOfPath('/test/post', new Response(json_encode([])));
             $client = new Client([
                 'base_url' => str_replace('/test/post', '', $url),
                 'headers' => [
@@ -84,15 +88,17 @@ if (version_compare(PHP_VERSION, '7.1.0') >= 0) {
                     'Accept' => '*/*'
                 ]
             ], $client->getOptions());
-        }
+        });
+    }
 
-        public function test_curl_client_send_request_with_options()
-        {
+    public function test_curl_client_send_request_with_options()
+    {
+        $this->runPHPUnitTest(function ($server) {
             $response = new ResponseByMethod([
                 ResponseByMethod::METHOD_GET  => new Response("/GET response"),
                 ResponseByMethod::METHOD_POST => new PostRequestResponse('', [], 201),
             ]);
-            $url = self::$server->setResponseOfPath('/test/post/1', $response);
+            $url = $server->setResponseOfPath('/test/post/1', $response);
             $client = new Client($url);
 
             $client->send('POST', [
@@ -108,14 +114,6 @@ if (version_compare(PHP_VERSION, '7.1.0') >= 0) {
             $response = $client->getResponse();
             $this->assertEquals(201, $client->getStatusCode());
             $this->assertTrue(is_string($response));
-        }
-
-        static function tearDownAfterClass(): void
-        {
-            // stopping the web server during tear down allows us to reuse the port for later tests
-            self::$server->stop();
-
-            return;
-        }
+        });
     }
 }

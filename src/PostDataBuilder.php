@@ -5,12 +5,6 @@ namespace Drewlabs\Curl;
 use Drewlabs\Curl\Converters\JSONEncoder;
 use RuntimeException;
 
-/**
- * Post data builder class based on request content-type header
- * 
- * @internal
- * @package Drewlabs\Curl
- */
 class PostDataBuilder
 {
 
@@ -85,7 +79,7 @@ class PostDataBuilder
     private function useDefaultEncoder($url_encoded = false)
     {
         return function (PostData $postData) use ($url_encoded) {
-            [$output, $isBinary] = [$postData->isMultiDimensional() ? $postData->flatten()->getContent() :  $postData->getContent(), false];
+            list($output, $isBinary) = [$postData->isMultiDimensional() ? $postData->flatten()->getContent() :  $postData->getContent(), false];
             if (is_array($output) || is_object($output)) {
                 foreach ($output as $key => $value) {
                     if (is_string($value) && strpos($value, '@') === 0 && is_file(substr($value, 1))) {
