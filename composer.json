@@ -27,5 +27,9 @@
     "require-dev": {
         "donatj/mock-webserver": "^2.5",
         "phpunit/phpunit": "^6.0"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
     }
 }
