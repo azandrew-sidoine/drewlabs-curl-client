@@ -12,16 +12,10 @@ if (!defined('JSON_PRETTY_PRINT')) {
  */
 class JSONEncoder
 {
-    /**
-     * 
-     * @var int
-     */
+    /** @var int */
     private $depth = 512;
 
-    /**
-     * 
-     * @var int
-     */
+    /** @var int */
     private $flags = JSON_PRETTY_PRINT;
 
     /**

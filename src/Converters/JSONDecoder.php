@@ -15,22 +15,13 @@ if (!defined('JSON_THROW_ON_ERROR')) {
 class JSONDecoder
 {
 
-    /**
-     * 
-     * @var bool
-     */
+    /** @var bool */
     private $associative;
 
-    /**
-     * 
-     * @var int
-     */
+    /** @var int */
     private $depth = 512;
 
-    /**
-     * 
-     * @var int
-     */
+    /** @var int  */
     private $flags = JSON_THROW_ON_ERROR;
 
     /**

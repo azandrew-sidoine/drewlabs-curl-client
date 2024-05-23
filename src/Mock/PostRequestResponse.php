@@ -7,19 +7,23 @@ use donatj\MockWebServer\RequestInfo;
 
 class PostRequestResponse implements InitializingResponseInterface
 {
-    /**
-     * @var string
-     */
+    /** @var string */
     private $body;
-    /**
-     * @var array
-     */
+
+    /** @var array */
     private $headers;
-    /**
-     * @var int
-     */
+
+    /** @var int */
     private $status;
 
+    /**
+     * Creates mock object instance
+     * 
+     * @param string $body 
+     * @param array $headers 
+     * @param int $status 
+     * @return void 
+     */
     public function __construct($body = '', array $headers = [], $status = 200)
     {
         $this->body    = $body;
