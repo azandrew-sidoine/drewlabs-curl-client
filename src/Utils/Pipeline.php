@@ -5,10 +5,17 @@ namespace Drewlabs\Curl\Utils;
 use Closure;
 use Exception;
 
+/**
+ * Class is marked as deprecated due to non usage by the library
+ * 
+ * @deprecated
+ */
 class Pipeline
 {
 
     /**
+     * Creates an HTTP request pipeline that transform request instance
+     * through a list of provided callable functions
      * 
      * @param callable[] $pipeline 
      * @return Closure 
