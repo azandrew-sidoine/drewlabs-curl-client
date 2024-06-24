@@ -5,10 +5,7 @@ namespace Drewlabs\Curl;
 class RegExp
 {
 
-    /**
-     * 
-     * @var string
-     */
+    /** @var string */
     const JSON_PATTERN = '/^(?:application|text)\/(?:[a-z]+(?:[\.-][0-9a-z]+){0,}[\+\.]|x-)?json(?:-[a-z]+)?/i';
 
     /**
