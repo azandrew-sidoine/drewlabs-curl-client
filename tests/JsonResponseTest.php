@@ -1,5 +1,8 @@
 <?php
 
+
+namespace Drewlabs\Curl\Tests;
+
 use Drewlabs\Curl\Utils\JsonResponse;
 use PHPUnit\Framework\TestCase;
 

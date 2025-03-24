@@ -1,5 +1,7 @@
 <?php
 
+namespace Drewlabs\Curl\Tests;
+
 use Drewlabs\Curl\Utils\Response;
 use PHPUnit\Framework\TestCase;
 

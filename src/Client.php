@@ -3,6 +3,7 @@
 namespace Drewlabs\Curl;
 
 use CurlHandle;
+use Drewlabs\Curl\Utils\RegExp;
 use RuntimeException;
 use ErrorException;
 use InvalidArgumentException;
@@ -10,92 +11,44 @@ use InvalidArgumentException;
 class Client
 {
 
-    /**
-     * Current package version
-     * 
-     * @var string
-     */
+    /** @var string Current package version */
     const VERSION = '0.1.0';
 
-    /**
-     * 
-     * @var \CurlHandle
-     */
+    /**  @var \CurlHandle */
     private $curl;
 
-    /**
-     * 
-     * @var string
-     */
+    /** @var string */
     private $response;
 
-    /**
-     * 
-     * @var string
-     */
+    /** @var string */
     private $id;
 
-    /**
-     * 
-     * @var string
-     */
+    /** @var string */
     private $protocolVersion = '1.1';
 
-    /**
-     * 
-     * @var string
-     */
+    /** @var string */
     private $curlErrorMessage;
 
-    /**
-     * 
-     * @var int
-     */
+    /** @var int */
     private $curlError;
 
-    /**
-     * 
-     * @var CurlHeadersCallback
-     */
+    /** @var CurlHeadersCallback */
     private $curlHeaderCallback;
 
-    /**
-     * List of event listeners for the current client
-     * 
-     * @var array
-     */
+    /**  @var array List of event listeners for the current client */
     private $listeners = [];
 
-    /**
-     * Request options property
-     * 
-     * @var array
-     */
+    /** @var array Request options property */
     private $options = [];
 
-    /**
-     * 
-     * @var int
-     */
+    /** @var int */
     private $statusCode;
 
-    /**
-     * 
-     * @var string
-     */
+    /** @var string */
     private $rawResponseHeaders;
 
-    /**
-     * 
-     * @var string
-     */
+    /** @var string */
     private $base_url;
-
-    /**
-     * 
-     * @var string
-     */
-    private $method;
 
     /**
      * Creates an instance of PHP cURL controller
@@ -196,9 +149,10 @@ class Client
      * @param string $method 
      * @return static 
      */
-    public function setRequestMethod($method = 'GET')
+    public function setRequestMethod(string $method)
     {
-        $this->method = $method;
+        $this->options['method'] = $method;
+
         return $this;
     }
 
@@ -501,7 +455,7 @@ class Client
      * @param int|null $option 
      * @return mixed 
      */
-    public function getInfo(int $option = null)
+    public function getInfo(?int $option = null)
     {
         return curl_getinfo($this->curl, $option);
     }

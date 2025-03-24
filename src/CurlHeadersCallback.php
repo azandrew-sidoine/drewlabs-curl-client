@@ -2,24 +2,15 @@
 
 namespace Drewlabs\Curl;
 
-/**
- * Internal implementation of header callback register
- * 
- * @internal
- * @package Drewlabs\Curl
+/** 
+ * @internal internal implementation of header callback register
  */
 class CurlHeadersCallback
 {
-    /**
-     * 
-     * @var array
-     */
+    /**  @var array */
     private $cookies = [];
 
-    /**
-     * 
-     * @var string
-     */
+    /** @var string */
     private $headers = '';
 
     /**

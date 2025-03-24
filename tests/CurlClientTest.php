@@ -1,5 +1,7 @@
 <?php
 
+namespace Drewlabs\Curl\Tests;
+
 use donatj\MockWebServer\MockWebServer;
 use donatj\MockWebServer\Response;
 use donatj\MockWebServer\ResponseByMethod;
@@ -60,7 +62,9 @@ class CurlClientTest extends TestCase
     public function test_client_release_reset_client_configurations_to_default()
     {
         $this->runPHPUnitTest(function ($server) {
-            $url = $server->setResponseOfPath('/test/post', new Response(json_encode([])));
+            $url = $server->setResponseOfPath('/test/post', new ResponseByMethod([
+                ResponseByMethod::METHOD_POST => new Response(json_encode([]), [], 200),
+            ]));
             $client = new Client([
                 'base_url' => str_replace('/test/post', '', $url),
                 'headers' => [
@@ -69,9 +73,8 @@ class CurlClientTest extends TestCase
                 ]
             ]);
 
-            $client->send([
-                'url' => '/test/post'
-            ]);
+            $client->setRequestMethod('POST')->send([ 'url' => '/test/post' ]);
+
             $this->assertEquals(200, $client->getStatusCode());
             $this->assertTrue(is_string($client->getResponse()));
             $this->assertTrue(is_string($client->getResponseHeaders()));
@@ -86,7 +89,8 @@ class CurlClientTest extends TestCase
                 'headers' => [
                     'Content-Type' => 'application/json',
                     'Accept' => '*/*'
-                ]
+                ],
+                'method' => 'POST'
             ], $client->getOptions());
         });
     }

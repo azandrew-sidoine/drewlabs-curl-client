@@ -9,9 +9,6 @@ if (!defined('JSON_THROW_ON_ERROR')) {
     define('JSON_THROW_ON_ERROR', 4194304);
 }
 
-/**
- * @package \Drewlabs\Curl\Converters
- */
 class JSONDecoder
 {
 

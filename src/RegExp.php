@@ -2,6 +2,7 @@
 
 namespace Drewlabs\Curl;
 
+/** @deprecated use implementation from utils namespace */
 class RegExp
 {
 

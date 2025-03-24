@@ -8,6 +8,11 @@
             "Drewlabs\\Curl\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Drewlabs\\Curl\\Tests": "src/"
+        }
+    },
     "keywords": [
         "curl",
         "http"

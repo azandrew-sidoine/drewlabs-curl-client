@@ -7,9 +7,6 @@ if (!defined('JSON_PRETTY_PRINT')) {
     define('JSON_PRETTY_PRINT', 128);
 }
 
-/**
- * @package \Drewlabs\Curl\Converters
- */
 class JSONEncoder
 {
     /** @var int */
@@ -24,7 +21,7 @@ class JSONEncoder
      * @param null|int $depth 
      * @param int $flags 
      */
-    public function __construct(int $depth = null, int $flags = 0)
+    public function __construct(?int $depth = null, int $flags = 0)
     {
         $this->depth = $depth ?? 512;
         $this->flags =  $flags ?? JSON_PRETTY_PRINT;

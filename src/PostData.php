@@ -5,18 +5,12 @@ namespace Drewlabs\Curl;
 use JsonSerializable;
 
 /**
- * 
  * @method static PostData new($data)
- * 
- * @package Drewlabs\TxnClient
  */
 class PostData
 {
 
-    /**
-     * 
-     * @var string|array|\JsonSerializable
-     */
+    /** @var string|array|\JsonSerializable */
     private $content;
 
     /**

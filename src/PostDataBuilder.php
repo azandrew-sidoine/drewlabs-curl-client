@@ -8,16 +8,10 @@ use RuntimeException;
 class PostDataBuilder
 {
 
-    /**
-     * 
-     * @var PostData
-     */
+    /**  @var PostData */
     private $postData;
 
-    /**
-     * 
-     * @var \Closure
-     */
+    /** @var \Closure */
     private $encoder;
 
     /**
