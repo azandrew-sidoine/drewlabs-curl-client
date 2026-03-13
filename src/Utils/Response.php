@@ -63,7 +63,8 @@ class Response
     /**
      * Creates a json decoded response object from the current response
      * 
-     * @return JsonResponse 
+     * @return JsonResponse
+     * 
      * @throws JsonException 
      */
     public function json()

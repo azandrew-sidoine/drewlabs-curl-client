@@ -36,7 +36,7 @@ class CurlHeadersCallback
     }
 
     /**
-     * Returns the list of reponse cookies
+     * returns the list of reponse cookies
      * 
      * @return array 
      */
@@ -46,7 +46,7 @@ class CurlHeadersCallback
     }
 
     /**
-     * Returns the raw response headers
+     * returns the raw response headers
      * 
      * @return string 
      */

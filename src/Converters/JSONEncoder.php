@@ -2,7 +2,7 @@
 
 namespace Drewlabs\Curl\Converters;
 
-// Define the JSON_PRETTY_PRINT global constant if not exists
+// define the JSON_PRETTY_PRINT global constant if not exists
 if (!defined('JSON_PRETTY_PRINT')) {
     define('JSON_PRETTY_PRINT', 128);
 }
@@ -16,7 +16,7 @@ class JSONEncoder
     private $flags = JSON_PRETTY_PRINT;
 
     /**
-     * Creates a {@see \Drewlabs\TxnClient\JSONEncoder} instance
+     * creates a {@see \Drewlabs\TxnClient\JSONEncoder} instance
      * 
      * @param null|int $depth 
      * @param int $flags 

@@ -10,7 +10,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Drewlabs\\Curl\\Tests": "src/"
+            "Drewlabs\\Curl\\Tests\\": "src/"
         }
     },
     "keywords": [

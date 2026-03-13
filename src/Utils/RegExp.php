@@ -14,6 +14,6 @@ class RegExp
      */
     public static function matchJson(string $text)
     {
-        return false !== preg_match(self::JSON_PATTERN, $text);
+        return false !== preg_match(static::JSON_PATTERN, $text);
     }
 }

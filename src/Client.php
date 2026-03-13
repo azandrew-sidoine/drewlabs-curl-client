@@ -445,7 +445,10 @@ class Client
      */
     public function close()
     {
-        // We close the curl connection when we dispose the current instance
+        // we close the curl connection when we dispose the current instance
+        if (PHP_VERSION_ID > 80000) {
+            return;
+        }
         \curl_close($this->curl);
     }
 

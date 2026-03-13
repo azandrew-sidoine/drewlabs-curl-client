@@ -10,13 +10,14 @@ class RegExp
     const JSON_PATTERN = '/^(?:application|text)\/(?:[a-z]+(?:[\.-][0-9a-z]+){0,}[\+\.]|x-)?json(?:-[a-z]+)?/i';
 
     /**
-     * Returns a boolean value indicating whether the text string matches json or not
+     * returns a boolean value indicating whether the text string matches json or not
      * 
      * @param string $text 
+     * 
      * @return bool 
      */
     public static function matchJson(string $text)
     {
-        return false !== preg_match(self::JSON_PATTERN, $text);
+        return false !== preg_match(static::JSON_PATTERN, $text);
     }
 }

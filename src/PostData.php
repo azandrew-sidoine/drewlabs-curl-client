@@ -30,7 +30,7 @@ class PostData
     }
 
     /**
-     * Returns the raw or internal value of the current instance
+     * returns the raw or internal value of the current instance
      * 
      * @return string|array|JsonSerializable 
      */
@@ -40,7 +40,7 @@ class PostData
     }
 
     /**
-     * Check if the post data is multi dimensional arraay
+     * checks if the post data is multi dimensional arraay
      *
      * @access public
      * @param  $array
@@ -56,7 +56,7 @@ class PostData
     }
 
     /**
-     * Check if the data is JSON serializable
+     * checks if the data is JSON serializable
      * 
      * @return bool 
      */
@@ -71,8 +71,7 @@ class PostData
     }
 
     /**
-     * Return the current instance with data flatten to
-     * a 1 dimensional list
+     * returns the current instance with data flatten to a 1 dimensional list
      * 
      * @return static 
      */
@@ -83,7 +82,7 @@ class PostData
     }
 
     /**
-     * Converts input data to 1 dimensional list of values
+     * converts input data to 1 dimensional list of values
      * 
      * @param mixed $data 
      * @param bool $prefix 

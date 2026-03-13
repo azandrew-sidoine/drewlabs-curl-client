@@ -4,7 +4,7 @@ namespace Drewlabs\Curl\Converters;
 
 use JsonException;
 
-// Define the JSON_THROW_ON_ERROR global constant if not exists
+// define the JSON_THROW_ON_ERROR global constant if not exists
 if (!defined('JSON_THROW_ON_ERROR')) {
     define('JSON_THROW_ON_ERROR', 4194304);
 }
@@ -22,7 +22,7 @@ class JSONDecoder
     private $flags = JSON_THROW_ON_ERROR;
 
     /**
-     * Creates a {@see \Drewlabs\TxnClient\JSONDecoder} instance
+     * creates a {@see \Drewlabs\TxnClient\JSONDecoder} instance
      * 
      * @param bool $associative 
      * @param null|int $depth 
